@@ -10,4 +10,4 @@ jobs:
       - name: Call hello API route
         run: |
           curl --request GET \
-          --url 'https://player-grid.vercel.app/api/cron' \
+          --url 'https://player-grid.vercel.app/api/hello' \
