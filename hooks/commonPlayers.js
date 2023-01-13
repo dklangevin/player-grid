@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { commonPlayers } from '../utils/helpers';
+import { commonPlayers, intersection } from '../utils/helpers';
 
 export default function useCommonPlayers(rowTeams, colTeams) {
   return useMemo(() => {
@@ -7,13 +7,12 @@ export default function useCommonPlayers(rowTeams, colTeams) {
     if (!m || !n) {
       return null;
     }
-    console.log('computing common players...');
     return rowTeams.map((_, i) =>
       colTeams.map((_, j) =>
-        commonPlayers(rowTeams[i].team.id, colTeams[j].team.id, [
-          ...rowTeams,
-          ...colTeams,
-        ])
+        intersection(
+          rowTeams[i].players.map(({ id }) => id),
+          colTeams[j].players.map(({ id }) => id)
+        )
       )
     );
   }, [rowTeams, colTeams]);
