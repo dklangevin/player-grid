@@ -2,60 +2,71 @@ import Button from './Button';
 import styled, { css } from 'styled-components';
 import { useState } from 'react';
 import { IconClose } from '../icons';
+import Switch from './Switch';
 
 export default function Options({ onClose, options, setOptions }) {
   return (
     <Container onClick={onClose}>
       <Content onClick={(e) => e.stopPropagation()}>
-        <CloseIcon onClick={onClose} />
+        <Title>
+          OPTIONS <CloseIcon onClick={onClose} />
+        </Title>
+
+        <SectionTitle>Size</SectionTitle>
         <Item>
           <ItemText>Rows</ItemText>
-          {[3, 4, 5].map((i) => (
-            <Number
-              key={i}
-              onClick={() => setOptions({ ...options, rows: i })}
-              selected={i === options.rows}
-            >
-              {i}
-            </Number>
-          ))}
+          <Numbers>
+            {[3, 4, 5].map((i) => (
+              <Number
+                key={i}
+                onClick={() => setOptions({ ...options, rows: i })}
+                selected={i === options.rows}
+              >
+                {i}
+              </Number>
+            ))}
+          </Numbers>
         </Item>
         <Item>
           <ItemText>Columns</ItemText>
-          {[3, 4, 5].map((i) => (
-            <Number
-              key={i}
-              onClick={() => setOptions({ ...options, columns: i })}
-              selected={i === options.columns}
-            >
-              {i}
-            </Number>
-          ))}
+          <Numbers>
+            {[3, 4, 5].map((i) => (
+              <Number
+                key={i}
+                onClick={() => setOptions({ ...options, columns: i })}
+                selected={i === options.columns}
+              >
+                {i}
+              </Number>
+            ))}
+          </Numbers>
         </Item>
+
+        <Divider />
+
+        <SectionTitle>Display Options</SectionTitle>
         <Item>
-          <ItemText>Show Player Count</ItemText>
-          <Checkbox
-            type='checkbox'
-            onClick={() =>
+          <ItemText>Player Count</ItemText>
+          <Switch
+            on={options.showPlayerCount}
+            onToggle={() =>
               setOptions({
                 ...options,
                 showPlayerCount: !options.showPlayerCount,
               })
             }
-            checked={options.showPlayerCount}
           />
         </Item>
         <Item>
-          <ItemText>Show Player Headshots</ItemText>
-          <Checkbox
-            type='checkbox'
-            onClick={() =>
+          <ItemText>Player Headshots</ItemText>
+          <Switch
+            on={options.showPlayerHeadshots}
+            onToggle={() =>
               setOptions({
                 ...options,
                 showPlayerHeadshots: !options.showPlayerHeadshots,
               })
             }
-            checked={options.showPlayerHeadshots}
           />
         </Item>
       </Content>
@@ -65,7 +76,8 @@ export default function Options({ onClose, options, setOptions }) {
 
 const Container = styled.div`
   width: 100vw;
-  height: 100%;
+  height: 100vh;
+  min-height: 100vh;
   position: absolute;
   top: 0;
   left: 0;
@@ -73,15 +85,31 @@ const Container = styled.div`
 `;
 
 const Content = styled.div`
-  width: fit-content;
+  width: 300px;
   height: 100%;
+  min-width: fit-content;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   padding: 16px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
-  background: linear-gradient(29deg, #222255, hsla(222, 77%, 22%, 1));
+  background: linear-gradient(29deg, rgb(50, 50, 50), rgb(30, 30, 30));
+  backdrop-filter: blur(9px);
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
+  height: 32px;
+  margin-bottom: 16px;
+  color: grey;
+`;
+
+const SectionTitle = styled.div`
+  display: flex;
+  align-items: center;
+  height: 32px;
 `;
 
 const Item = styled.div`
@@ -94,20 +122,30 @@ const Item = styled.div`
 const ItemText = styled.span`
   padding-right: 12px;
   margin-right: auto;
+  color: grey;
+`;
+
+const Numbers = styled.div`
+  display: flex;
+  background: #444444;
+  border-radius: 4px;
+  /* padding: 3px; */
 `;
 
 const Number = styled.span`
-  border-radius: 1000px;
-  width: 32px;
-  height: 32px;
-  line-height: 32px;
+  border-radius: 4px;
+  /* margin: -1px; */
+  width: 36px;
+  height: 28px;
+  line-height: 28px;
   text-align: center;
   cursor: pointer;
+  color: #aaaaaa;
   ${({ selected }) =>
     selected &&
     css`
-      background: white;
-      color: black;
+      background: #008ad9;
+      color: white;
     `}
   :hover {
     /* color: #dddddd; */
@@ -122,9 +160,13 @@ const Checkbox = styled.input`
 `;
 
 const CloseIcon = styled(IconClose)`
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
   margin-left: auto;
-  margin-bottom: 16px;
+`;
+
+const Divider = styled.hr`
+  width: 100%;
+  border: 1px solid #343434;
 `;
