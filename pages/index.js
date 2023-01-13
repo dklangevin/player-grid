@@ -4,6 +4,8 @@ import Button from '../components/Button';
 import { intersection } from '../utils/helpers';
 import useCommonPlayers from '../hooks/commonPlayers';
 import Options from '../components/Options';
+import { shuffled } from '../utils/helpers';
+import { IconSettings } from '../icons';
 
 // export const getServerSideProps = async () => {
 //   const res = await fetch('api/players');
@@ -39,13 +41,15 @@ export default function Home() {
     showPlayerCount: true,
     showPlayerHeadshots: true,
   });
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   // fetch data
   useEffect(() => {
     const fetchData = async () => {
-      const res = await (await fetch(`/api/players?count=${teamCount}`)).json();
-      setData(res);
+      const res = await (await fetch(`/api/teamPlayers`)).json();
+      setData(shuffled(res));
     };
+    console.log('data loaded');
     fetchData();
   }, []);
 
@@ -68,8 +72,8 @@ export default function Home() {
   );
 
   const searchResults = useMemo(() => {
-    return allPlayers.filter((player) =>
-      player.name.toLowerCase().includes(search)
+    return allPlayers.filter(({ firstname, lastname }) =>
+      `${firstname} ${lastname}`.toLowerCase().includes(search)
     );
   }, [search, allPlayers]);
 
@@ -134,17 +138,24 @@ export default function Home() {
 
   return (
     <Container>
-      <Options options={options} setOptions={setOptions} />
+      <SettingsIcon onClick={() => setOptionsOpen(true)} />
+      {optionsOpen && (
+        <Options
+          onClose={() => setOptionsOpen(false)}
+          options={options}
+          setOptions={setOptions}
+        />
+      )}
       <Content>
         <Grid>
-          {colTeams.map(({ team: { id } }, j) => (
+          {colTeams.map(({ id }, j) => (
             <Header key={`${id}-col-header`} i={1} j={j + 2}>
               <Logo
                 src={`https://cdn.nba.com/logos/nba/${id}/primary/L/logo.svg`}
               />
             </Header>
           ))}
-          {rowTeams.map(({ team: { id } }, i) => (
+          {rowTeams.map(({ id }, i) => (
             <Header key={`${id}-row-header`} i={i + 2} j={1}>
               <Logo
                 src={`https://cdn.nba.com/logos/nba/${id}/primary/L/logo.svg`}
@@ -202,13 +213,13 @@ export default function Home() {
                       }}
                     />
                   )}
-                  {player.name}
+                  {`${player.firstname} ${player.lastname}`}
                   <Number>{player.number}</Number>
                 </Player>
               ))}
             <Buttons>
               <Button
-                onClick={() => setSelectedPlayer(null)}
+                onClick={() => setSelectedPlayerId(null)}
                 appearance='secondary'
               >
                 Cancel
@@ -389,4 +400,14 @@ const PlaceholderNumber = styled.span`
   font-weight: 900;
   color: #777777bb;
   margin: auto;
+`;
+
+const SettingsIcon = styled(IconSettings)`
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  margin: 20px 24px;
+  position: absolute;
+  top: 0;
+  left: 0;
 `;
