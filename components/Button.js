@@ -33,12 +33,11 @@ const Container = styled.button`
   font-weight: 700;
   font-size: 18px;
   cursor: pointer;
-  position: relative;
 
   ${({ appearance }) =>
     appearance === 'primary'
       ? css`
-          background: #66AA66;
+          background: #66aa66;
         `
       : appearance === 'secondary' &&
         css`

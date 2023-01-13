@@ -1,96 +1,87 @@
 import Button from './Button';
 import styled, { css } from 'styled-components';
 import { useState } from 'react';
-import { DownArrow } from '../icons';
+import { IconClose } from '../icons';
 
-export default function Options({ options, setOptions }) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Options({ onClose, options, setOptions }) {
   return (
-    <Container>
-      <OptionsButton onClick={() => setIsOpen((prev) => !prev)}>
-        Options
-        <DownArrowIcon isOpen={isOpen} />
-      </OptionsButton>
-      {isOpen && (
-        <Content>
-          <Item>
-            <ItemText>Rows</ItemText>
-            {[3, 4, 5].map((i) => (
-              <Number
-                key={i}
-                onClick={() => setOptions({ ...options, rows: i })}
-                selected={i === options.rows}
-              >
-                {i}
-              </Number>
-            ))}
-          </Item>
-          <Item>
-            <ItemText>Columns</ItemText>
-            {[3, 4, 5].map((i) => (
-              <Number
-                key={i}
-                onClick={() => setOptions({ ...options, columns: i })}
-                selected={i === options.columns}
-              >
-                {i}
-              </Number>
-            ))}
-          </Item>
-          <Item>
-            <ItemText>Show Player Count</ItemText>
-            <Checkbox
-              type='checkbox'
-              onClick={() =>
-                setOptions({
-                  ...options,
-                  showPlayerCount: !options.showPlayerCount,
-                })
-              }
-              checked={options.showPlayerCount}
-            />
-          </Item>
-          <Item>
-            <ItemText>Show Player Headshots</ItemText>
-            <Checkbox
-              type='checkbox'
-              onClick={() =>
-                setOptions({
-                  ...options,
-                  showPlayerHeadshots: !options.showPlayerHeadshots,
-                })
-              }
-              checked={options.showPlayerHeadshots}
-            />
-          </Item>
-        </Content>
-      )}
+    <Container onClick={onClose}>
+      <Content onClick={(e) => e.stopPropagation()}>
+        <CloseIcon onClick={onClose} />
+        <Item>
+          <ItemText>Rows</ItemText>
+          {[3, 4, 5].map((i) => (
+            <Number
+              key={i}
+              onClick={() => setOptions({ ...options, rows: i })}
+              selected={i === options.rows}
+            >
+              {i}
+            </Number>
+          ))}
+        </Item>
+        <Item>
+          <ItemText>Columns</ItemText>
+          {[3, 4, 5].map((i) => (
+            <Number
+              key={i}
+              onClick={() => setOptions({ ...options, columns: i })}
+              selected={i === options.columns}
+            >
+              {i}
+            </Number>
+          ))}
+        </Item>
+        <Item>
+          <ItemText>Show Player Count</ItemText>
+          <Checkbox
+            type='checkbox'
+            onClick={() =>
+              setOptions({
+                ...options,
+                showPlayerCount: !options.showPlayerCount,
+              })
+            }
+            checked={options.showPlayerCount}
+          />
+        </Item>
+        <Item>
+          <ItemText>Show Player Headshots</ItemText>
+          <Checkbox
+            type='checkbox'
+            onClick={() =>
+              setOptions({
+                ...options,
+                showPlayerHeadshots: !options.showPlayerHeadshots,
+              })
+            }
+            checked={options.showPlayerHeadshots}
+          />
+        </Item>
+      </Content>
     </Container>
   );
 }
 
 const Container = styled.div`
+  width: 100vw;
   height: 100%;
-  padding: 32px;
-  width: 340px;
-`;
-
-const OptionsButton = styled(Button)`
-  background: #222222;
-  padding-inline: 32px;
-  width: fit-content;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.7);
 `;
 
 const Content = styled.div`
-  background: #333333;
-  border-radius: 8px;
+  width: fit-content;
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 16px;
   padding: 16px;
   font-size: 18px;
   font-weight: 900;
+  background: linear-gradient(29deg, #222255, hsla(222, 77%, 22%, 1));
 `;
 
 const Item = styled.div`
@@ -130,14 +121,10 @@ const Checkbox = styled.input`
   cursor: pointer;
 `;
 
-const DownArrowIcon = styled(DownArrow)`
-  width: 22px;
-  height: 22px;
-  color: white;
-  margin: 0 -16px 0 16px;
-  ${({ isOpen }) =>
-    isOpen &&
-    css`
-      transform: rotate(180deg);
-    `}
+const CloseIcon = styled(IconClose)`
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  margin-left: auto;
+  margin-bottom: 16px;
 `;
