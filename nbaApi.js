@@ -3,7 +3,7 @@ import { rowMapping } from './utils/helpers';
 
 const api = axios.create({
   baseURL: 'https://stats.nba.com/stats/',
-  timeout: 6000,
+  timeout: 100,
   headers: {
     Referer: 'https://www.nba.com',
     // Origin: 'https://www.nba.com',
@@ -127,8 +127,7 @@ export async function listTeam() {
   };
   const rows = await api
     .get(
-      // 'playerindex?College=&Country=&DraftPick=&DraftRound=&DraftYear=&Height=&Historical=0&LeagueID=00&Season=2022-23&SeasonType=Regular Season&TeamID=1610612757&Weight='
-      'https://www.google.com'
+      'playerindex?College=&Country=&DraftPick=&DraftRound=&DraftYear=&Height=&Historical=0&LeagueID=00&Season=2022-23&SeasonType=Regular Season&TeamID=1610612757&Weight='
     )
     .then((res) => {
       console.log(res.data);
@@ -139,7 +138,8 @@ export async function listTeam() {
       return rows;
     })
     .catch((err) => {
-      console.log(err);
+      console.log(err.message);
+      console.log(err.request);
       console.log('team fetch error');
     });
   return rows;
