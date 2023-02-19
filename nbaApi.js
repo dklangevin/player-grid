@@ -3,11 +3,10 @@ import { rowMapping } from './utils/helpers';
 
 const api = axios.create({
   baseURL: 'https://stats.nba.com/stats/',
-  timeout: 20000,
+  timeout: 10000,
   headers: {
     Referer: 'https://www.nba.com',
     Origin: 'https://www.nba.com',
-    'User-Agent': 'PostmanRuntime/7.28.4',
     Accept: '*/*',
     Host: 'stats.nba.com',
     'Accept-Encoding': 'gzip, deflate, br',
@@ -16,6 +15,7 @@ const api = axios.create({
 });
 
 export async function listTeams() {
+  console.log('fetching teams');
   const rows = await api
     .get(
       'leaguestandingsv3?GroupBy=conf&LeagueID=00&Season=2022-23&SeasonType=Regular%20Season&Section=overall'
@@ -25,6 +25,7 @@ export async function listTeams() {
       const rows = data.map((row) => ({ id: row[2], name: row[4] }));
       return rows;
     });
+  console.log('teams fetch success');
   return rows;
 }
 
