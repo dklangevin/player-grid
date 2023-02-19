@@ -3,7 +3,7 @@ import { rowMapping } from './utils/helpers';
 
 const api = axios.create({
   baseURL: 'https://stats.nba.com/stats/',
-  timeout: 10000,
+  timeout: 1000,
   headers: {
     Referer: 'https://www.nba.com',
     Origin: 'https://www.nba.com',
@@ -131,7 +131,7 @@ export async function listTeam() {
     })
     .catch((err) => {
       console.log(err.message);
-      console.log(err.request);
+      console.log(err.request._header);
       console.log('team fetch error');
     });
   return rows;
