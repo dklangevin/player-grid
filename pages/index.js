@@ -11,6 +11,7 @@ const COLUMN_COUNT = 5;
 
 export default function Home() {
   const [data, setData] = useState([]);
+  const [allPlayers, setAllPlayers] = useState([]);
   const [playerSelectorOpen, setPlayerSelectorOpen] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -31,14 +32,16 @@ export default function Home() {
   // fetch data
   useEffect(() => {
     const fetchData = async () => {
-      const res = await (await fetch(`/api/teamPlayers`)).json();
-      setData(res);
+      const _data = await (await fetch(`/api/teamPlayers`)).json();
+      setData(_data);
+      const _players = await (await fetch(`/api/players`)).json();
+      setAllPlayers(_players);
     };
     fetchData();
   }, []);
 
   // set row, column, and player lists
-  const [rowTeams, colTeams, allPlayers] = useMemo(
+  const [rowTeams, colTeams] = useMemo(
     () =>
       data
         ? [
@@ -49,11 +52,12 @@ export default function Home() {
                 ? -(data.length - options.rows - options.columns)
                 : data.length
             ),
-            uniqueBy(data.map((team) => team.players).flat(), 'id'), // make sure duplicates are filtered out (duplicates are expected because one player can play for multiple teams)
           ]
         : [],
     [data, options]
   );
+
+  // console.log(allPlayers.filter((player) => player.firstname === 'Nikola'));
 
   const searchResults = useMemo(() => {
     return allPlayers.filter(({ firstname, lastname }) =>
