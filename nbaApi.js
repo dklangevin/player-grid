@@ -11,7 +11,6 @@ const api = axios.create({
     // Host: 'stats.nba.com',
     'Accept-Encoding': 'gzip, deflate, br',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Credentials': true,
     // Connection: 'keep-alive',
   },
 });
@@ -23,6 +22,7 @@ export async function listTeams() {
     headers: {
       Referer: 'https://www.nba.com',
       // Origin: 'https://www.nba.com',
+      'Referrer-Policy': 'origin',
       Accept: '*/*',
     },
   };
