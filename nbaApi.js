@@ -3,7 +3,7 @@ import { rowMapping } from './utils/helpers';
 
 const api = axios.create({
   baseURL: 'https://stats.nba.com/stats/',
-  timeout: 3000,
+  timeout: 6000,
   headers: {
     Referer: 'https://www.nba.com',
     // Origin: 'https://www.nba.com',
