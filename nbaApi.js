@@ -36,6 +36,7 @@ export async function listTeams() {
       return rows;
     })
     .catch((err) => {
+      console.log(err);
       console.log(err.request._header);
     });
   console.log('teams fetch success');
