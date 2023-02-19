@@ -8,8 +8,8 @@ export default async function handler(request, response) {
     rows = await listTeams();
   } catch (error) {
     console.log(error);
-    console.log('Error: cannot get players');
-    response.status(500).json('Error: cannot get players');
+    console.log('Error: cannot get teams');
+    response.status(500).json('Error: cannot get teams');
     return;
   }
 
