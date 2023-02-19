@@ -127,7 +127,8 @@ export async function listTeam() {
   };
   const rows = await api
     .get(
-      'playerindex?College=&Country=&DraftPick=&DraftRound=&DraftYear=&Height=&Historical=0&LeagueID=00&Season=2022-23&SeasonType=Regular Season&TeamID=1610612757&Weight='
+      // 'playerindex?College=&Country=&DraftPick=&DraftRound=&DraftYear=&Height=&Historical=0&LeagueID=00&Season=2022-23&SeasonType=Regular Season&TeamID=1610612757&Weight='
+      'https://www.google.com'
     )
     .then((res) => {
       console.log(res.data);
