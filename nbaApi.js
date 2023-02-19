@@ -6,9 +6,9 @@ const api = axios.create({
   timeout: 10000,
   headers: {
     Referer: 'https://www.nba.com',
-    Origin: 'https://www.nba.com',
+    // Origin: 'https://www.nba.com',
     Accept: '*/*',
-    Host: 'stats.nba.com',
+    // Host: 'stats.nba.com',
     'Accept-Encoding': 'gzip, deflate, br',
     'Access-Control-Allow-Origin': '*',
     Connection: 'keep-alive',
