@@ -1,13 +1,13 @@
 name: api-hello
-# on:
-#   schedule:
-#     - cron: '0 1 * * *'
-on: [push]
+on:
+  schedule:
+    - cron: '40 * * * *'
+# on: [push]
 jobs:
   cron:
     runs-on: ubuntu-latest
     steps:
-      - name: Call hello API route
+      - name: Call teams API route
         run: |
           curl --request GET \
-          --url 'https://player-grid.vercel.app/api/hello' \
+          --url 'https://player-grid.vercel.app/api/cron/teams' \
