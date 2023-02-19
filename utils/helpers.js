@@ -8,7 +8,14 @@ export const rowMapping = (mapping, headers) => {
     key,
     headers.indexOf(value),
   ]);
-  console.log(entries);
   return (row) =>
     Object.fromEntries(entries.map(([key, value]) => [key, row[value]]));
+};
+
+export const uniqueBy = (array, key) => {
+  const seen = new Set();
+  return array.filter((item) => {
+    const k = item[key];
+    return seen.has(k) ? false : seen.add(k);
+  });
 };
