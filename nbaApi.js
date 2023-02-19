@@ -114,3 +114,31 @@ export async function listPlayers(teamId) {
 
   return rows;
 }
+
+export async function listTeam() {
+  console.log('fetching team');
+  const options = {
+    method: 'GET',
+    headers: {
+      Referer: 'https://www.nba.com',
+      'Referrer-Policy': 'no-referrer',
+      Accept: '*/*',
+    },
+  };
+  const rows = await api
+    .get(
+      'https://stats.nba.com/stats/playerindex?College=&Country=&DraftPick=&DraftRound=&DraftYear=&Height=&Historical=0&LeagueID=00&Season=2022-23&SeasonType=Regular Season&TeamID=1610612757&Weight='
+    )
+    .then((res) => {
+      console.log(res.data);
+      const data = res.data.resultSets[0].rowSet;
+      const rows = data.map((row) => ({ id: row[2], name: row[4] }));
+      return rows;
+    })
+    .catch((err) => {
+      console.log(err);
+      console.log(err.request._header);
+    });
+  console.log('team fetch success');
+  return rows;
+}
