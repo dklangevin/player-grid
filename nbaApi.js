@@ -10,6 +10,7 @@ const api = axios.create({
     Accept: '*/*',
     Host: 'stats.nba.com',
     'Accept-Encoding': 'gzip, deflate, br',
+    'Access-Control-Allow-Origin': '*',
     Connection: 'keep-alive',
   },
 });
