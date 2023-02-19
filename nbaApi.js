@@ -12,7 +12,7 @@ const api = axios.create({
     'Accept-Encoding': 'gzip, deflate, br',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Credentials': true,
-    Connection: 'keep-alive',
+    // Connection: 'keep-alive',
   },
 });
 
