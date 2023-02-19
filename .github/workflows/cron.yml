@@ -1,8 +1,7 @@
-name: api-hello
+name: teams-players-cron
 on:
   schedule:
-    - cron: '40 * * * *'
-# on: [push]
+    - cron: '48 * * * *'
 jobs:
   cron:
     runs-on: ubuntu-latest
@@ -11,3 +10,7 @@ jobs:
         run: |
           curl --request GET \
           --url 'https://player-grid.vercel.app/api/cron/teams' \
+      - name: Call teamPlayers API route
+        run: |
+          curl --request GET \
+          --url 'https://player-grid.vercel.app/api/cron/teamPlayers' \
