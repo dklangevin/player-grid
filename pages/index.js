@@ -1,28 +1,13 @@
+import { useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { useState, useEffect, useMemo } from 'react';
 import Button from '../components/Button';
-import { intersection } from '../utils/helpers';
-import useCommonPlayers from '../hooks/commonPlayers';
 import Options from '../components/Options';
-import { shuffled } from '../utils/helpers';
+import useCommonPlayers from '../hooks/commonPlayers';
 import { IconSettings } from '../icons';
+import { uniqueBy } from '../utils/helpers';
 
-// export const getServerSideProps = async () => {
-//   const res = await fetch('api/players');
-
-//   const data = await res.json();
-
-//   return {
-//     props: {
-//       data,
-//     },
-//   };
-// };
-
-const rowCount = 5;
-const colCount = 5;
-const squareCount = rowCount * colCount;
-const teamCount = rowCount + colCount;
+const ROW_COUNT = 5;
+const COLUMN_COUNT = 5;
 
 export default function Home() {
   const [data, setData] = useState([]);
@@ -33,7 +18,7 @@ export default function Home() {
   const [currentJ, setCurrentJ] = useState();
   const [search, setSearch] = useState('');
   const [chosenPlayers, setChosenPlayers] = useState(
-    Array(rowCount).fill(Array(colCount).fill(null))
+    Array(ROW_COUNT).fill(Array(COLUMN_COUNT).fill(null))
   );
   const [options, setOptions] = useState({
     rows: 4,
@@ -47,9 +32,8 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       const res = await (await fetch(`/api/teamPlayers`)).json();
-      setData(shuffled(res));
+      setData(res);
     };
-    console.log('data loaded');
     fetchData();
   }, []);
 
@@ -65,7 +49,7 @@ export default function Home() {
                 ? -(data.length - options.rows - options.columns)
                 : data.length
             ),
-            data.map((team) => team.players).flat(),
+            uniqueBy(data.map((team) => team.players).flat(), 'id'), // make sure duplicates are filtered out (duplicates are expected because one player can play for multiple teams)
           ]
         : [],
     [data, options]
@@ -195,7 +179,7 @@ export default function Home() {
             <Search
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder='Search for a player'
+              placeholder="Search for a player"
             />
             {search &&
               searchResults.slice(0, 5).map((player, i) => (
@@ -220,7 +204,7 @@ export default function Home() {
             <Buttons>
               <Button
                 onClick={() => setSelectedPlayerId(null)}
-                appearance='secondary'
+                appearance="secondary"
               >
                 Cancel
               </Button>
@@ -229,23 +213,8 @@ export default function Home() {
           </PlayerSelector>
         )}
       </Content>
-      {/* <Teams>
-          {data?.map(({ team, players }) => (
-            <Team key={team}>
-              <TeamName>{team}</TeamName>
-              {players.map(({ id, name, number, position }) => (
-                <Player key={id}>
-                  <Number>{number}</Number>
-                  {name}
-                  <Position>{position}</Position>
-                </Player>
-              ))}
-            </Team>
-          ))}
-        </Teams> */}
     </Container>
   );
-  // return <Container></Container>;
 }
 
 const Container = styled.div`
@@ -257,21 +226,6 @@ const Container = styled.div`
 const Teams = styled.div`
   display: flex;
   background: #333333;
-`;
-
-const Team = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const TeamName = styled.div`
-  background: #555555;
-  padding: 8px;
-  font-weight: 800;
-`;
-
-const Position = styled.span`
-  font-weight: 900;
 `;
 
 const Content = styled.div`
@@ -376,12 +330,6 @@ const Square = styled.div`
       : css`
           background: #884444;
         `)};
-  /* background: #333333;
-  ${({ selected }) =>
-    selected &&
-    css`
-      border: 2px solid white;
-    `} */
   grid-row: ${({ i }) => i};
   grid-column: ${({ j }) => j};
   border-radius: 8px;
