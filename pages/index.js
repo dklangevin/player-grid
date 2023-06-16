@@ -165,6 +165,8 @@ export default function Home() {
     setSelectedPlayerId(null);
   };
 
+  const loading = true || loadingTeams || loadingPlayers;
+
   return (
     <Container>
       {lives === 0 ? (
@@ -200,49 +202,54 @@ export default function Home() {
             />
           )}
           <Content>
-            <Grid>
-              {colTeams?.map(({ teamId }, j) => (
-                <Header key={`${teamId}-col-header`} i={1} j={j + 2}>
-                  <Logo
-                    src={`https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`}
-                  />
-                </Header>
-              ))}
-              {rowTeams?.map(({ teamId }, i) => (
-                <Header key={`${teamId}-row-header`} i={i + 2} j={1}>
-                  <Logo
-                    src={`https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`}
-                  />
-                </Header>
-              ))}
-              {rowTeams?.map((_, i) =>
-                colTeams?.map((_, j) => (
-                  <Square
-                    key={`${i}${j}`}
-                    i={i + 2}
-                    j={j + 2}
-                    selected={isSelected(i, j)}
-                    confirmed={chosenPlayers[i][j]?.confirmed}
-                    correct={chosenPlayers[i][j]?.correct}
-                    onClick={() => setSelected(i, j)}
-                  >
-                    {chosenPlayers[i][j] ? (
-                      <SquareHeadshot
-                        src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${chosenPlayers[i][j].playerId}.png`}
-                        onError={({ currentTarget }) => {
-                          currentTarget.onerror = null;
-                          currentTarget.src = 'fallback.webp';
-                        }}
-                      />
-                    ) : (
-                      <PlaceholderNumber>
-                        {options.showPlayerCount && commonPlayers[i][j].length}
-                      </PlaceholderNumber>
-                    )}
-                  </Square>
-                ))
-              )}
-            </Grid>
+            {loading ? (
+              <Loading>Loading...</Loading>
+            ) : (
+              <Grid>
+                {colTeams?.map(({ teamId }, j) => (
+                  <Header key={`${teamId}-col-header`} i={1} j={j + 2}>
+                    <Logo
+                      src={`https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`}
+                    />
+                  </Header>
+                ))}
+                {rowTeams?.map(({ teamId }, i) => (
+                  <Header key={`${teamId}-row-header`} i={i + 2} j={1}>
+                    <Logo
+                      src={`https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`}
+                    />
+                  </Header>
+                ))}
+                {rowTeams?.map((_, i) =>
+                  colTeams?.map((_, j) => (
+                    <Square
+                      key={`${i}${j}`}
+                      i={i + 2}
+                      j={j + 2}
+                      selected={isSelected(i, j)}
+                      confirmed={chosenPlayers[i][j]?.confirmed}
+                      correct={chosenPlayers[i][j]?.correct}
+                      onClick={() => setSelected(i, j)}
+                    >
+                      {chosenPlayers[i][j] ? (
+                        <SquareHeadshot
+                          src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${chosenPlayers[i][j].playerId}.png`}
+                          onError={({ currentTarget }) => {
+                            currentTarget.onerror = null;
+                            currentTarget.src = 'fallback.webp';
+                          }}
+                        />
+                      ) : (
+                        <PlaceholderNumber>
+                          {options.showPlayerCount &&
+                            commonPlayers[i][j].length}
+                        </PlaceholderNumber>
+                      )}
+                    </Square>
+                  ))
+                )}
+              </Grid>
+            )}
 
             {playerSelectorOpen && (
               <PlayerSelector>
@@ -464,4 +471,8 @@ const GameOver = styled.div`
   width: 200px;
   font-size: 24px;
   font-weight: 800;
+`;
+
+const Loading = styled.span`
+  font-size: 24px;
 `;
