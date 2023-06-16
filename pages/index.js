@@ -1,104 +1,114 @@
+import Button from 'components/Button';
+import HowToPlay from 'components/HowToPlay';
+import Options from 'components/NewGame';
+import usePlayers from 'data/players';
+import useTeams from 'data/teams';
+import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
+import { Heart } from 'react-ionicons';
 import styled, { css } from 'styled-components';
-import Button from '../components/Button';
-import Options from '../components/Options';
 import useCommonPlayers from '../hooks/commonPlayers';
-import { IconSettings } from '../icons';
-import { uniqueBy } from '../utils/helpers';
+import { generateSeed } from '../utils/helpers';
 
-const ROW_COUNT = 5;
-const COLUMN_COUNT = 5;
+const ROW_COUNT = 4;
+const COLUMN_COUNT = 4;
 
 export default function Home() {
-  const [data, setData] = useState([]);
-  const [allPlayers, setAllPlayers] = useState([]);
+  const router = useRouter();
+
+  const [howToPlayModalOpen, setHowToPlayModalOpen] = useState(false);
+  const [optionsModalOpen, setOptionsModalOpen] = useState(false);
   const [playerSelectorOpen, setPlayerSelectorOpen] = useState(false);
+
+  const [lives, setLives] = useState(3);
+
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
-  const [confirmed, setConfirmed] = useState(false);
-  const [currentI, setCurrentI] = useState();
-  const [currentJ, setCurrentJ] = useState();
+
+  const [currentI, setCurrentI] = useState(null);
+  const [currentJ, setCurrentJ] = useState(null);
+
   const [search, setSearch] = useState('');
   const [chosenPlayers, setChosenPlayers] = useState(
     Array(ROW_COUNT).fill(Array(COLUMN_COUNT).fill(null))
   );
+
   const [options, setOptions] = useState({
-    rows: 4,
-    columns: 4,
+    rows: ROW_COUNT,
+    columns: COLUMN_COUNT,
     showPlayerCount: true,
     showPlayerHeadshots: true,
   });
-  const [optionsOpen, setOptionsOpen] = useState(false);
 
-  // fetch data
   useEffect(() => {
-    const fetchData = async () => {
-      const _data = await (await fetch(`/api/teamPlayers`)).json();
-      setData(_data);
-      const _players = await (await fetch(`/api/players`)).json();
-      setAllPlayers(_players);
-    };
-    fetchData();
+    const value = localStorage.getItem('firstVisit');
+    setHowToPlayModalOpen(value !== 'false');
   }, []);
+
+  const seed = generateSeed();
+
+  const teamIds = [1610612737, 1610612738, 1610612739];
+  const { data: teams, loading: loadingTeams } = useTeams({
+    limit: options.rows + options.columns,
+  });
+  const { data: players, loading: loadingPlayers } = usePlayers();
 
   // set row, column, and player lists
   const [rowTeams, colTeams] = useMemo(
     () =>
-      data
+      teams
         ? [
-            data.slice(0, options.rows),
-            data.slice(
-              options.rows,
-              data.length - options.rows - options.columns > 0
-                ? -(data.length - options.rows - options.columns)
-                : data.length
-            ),
+            teams.slice(0, options.rows),
+            teams.slice(options.rows, teams.length),
           ]
         : [],
-    [data, options]
+    [teams, options]
   );
 
-  // console.log(allPlayers.filter((player) => player.firstname === 'Nikola'));
-
   const searchResults = useMemo(() => {
-    return allPlayers.filter(({ firstname, lastname }) =>
-      `${firstname} ${lastname}`.toLowerCase().includes(search)
+    return players?.filter(({ firstName, lastName }) =>
+      `${firstName} ${lastName}`.toLowerCase().includes(search)
     );
-  }, [search, allPlayers]);
+  }, [search, players]);
 
   const isSelected = (i, j) => i === currentI && j === currentJ;
 
   const commonPlayers = useCommonPlayers(rowTeams, colTeams);
 
-  useEffect(() => {
-    if (confirmed) {
+  // useEffect(() => {
+  //   if (confirmed) {
+  //     setChosenPlayers((prev) =>
+  //       prev.map((row, i) =>
+  //         row.map((item, j) => {
+  //           return item.confirmed && i === currentI && j === currentJ
+  //             ? { ...item, confirmed: true }
+  //             : item;
+  //         })
+  //       )
+  //     );
+  //   }
+  // }, [confirmed, setChosenPlayers, currentI, currentJ]);
+
+  const selectPlayer = (player) => {
+    if (!chosenPlayers[currentI][currentJ]?.confirmed) {
+      setSelectedPlayerId(player.playerId);
       setChosenPlayers((prev) =>
         prev.map((row, i) =>
           row.map((item, j) => {
-            return item.confirmed && i === currentI && j === currentJ
-              ? { ...item, confirmed: true }
+            return i === currentI && j === currentJ
+              ? { ...player, confirmed: false }
               : item;
           })
         )
       );
     }
-  }, [confirmed, setChosenPlayers, currentI, currentJ]);
-
-  const selectPlayer = (player) => {
-    setSelectedPlayerId(player.id);
-    setChosenPlayers((prev) =>
-      prev.map((row, i) =>
-        row.map((item, j) => {
-          return i === currentI && j === currentJ
-            ? { ...player, confirmed: false }
-            : item;
-        })
-      )
-    );
   };
 
   const confirmSelection = () => {
     const correct =
       commonPlayers[currentI][currentJ].includes(selectedPlayerId);
+    if (!correct) {
+      setLives(lives - 1);
+    }
     setSelectedPlayerId(null);
     setChosenPlayers((prev) =>
       prev.map((row, i) =>
@@ -113,6 +123,7 @@ export default function Home() {
 
   const setSelected = (i, j) => {
     setPlayerSelectorOpen(true);
+    setSelectedPlayerId(null);
     setChosenPlayers((prev) =>
       prev.map((row, _i) =>
         row.map((item, _j) => {
@@ -124,99 +135,165 @@ export default function Home() {
     setCurrentJ(j);
   };
 
+  const cancelSelection = () => {
+    setSearch('');
+    setPlayerSelectorOpen(false);
+    setSelectedPlayerId(null);
+    setChosenPlayers((prev) =>
+      prev.map((row, i) =>
+        row.map((item, j) =>
+          i === currentI && j === currentJ && !item?.confirmed ? null : item
+        )
+      )
+    );
+  };
+
+  const isSquareDisabled = (i, j) => {
+    const item = chosenPlayers[i][j];
+    return item?.confirmed;
+  };
+
+  const reset = () => {
+    setLives(3);
+    setSearch('');
+    setPlayerSelectorOpen(false);
+    setCurrentI(null);
+    setCurrentJ(null);
+    setChosenPlayers(
+      Array(options.rows).fill(Array(options.columns).fill(null))
+    );
+    setSelectedPlayerId(null);
+  };
+
   return (
     <Container>
-      <SettingsIcon onClick={() => setOptionsOpen(true)} />
-      {optionsOpen && (
-        <Options
-          onClose={() => setOptionsOpen(false)}
-          options={options}
-          setOptions={setOptions}
+      {lives === 0 ? (
+        <GameOver>
+          Game Over!
+          <Button
+            onClick={() => {
+              router.reload();
+            }}
+          >
+            Play Again
+          </Button>
+        </GameOver>
+      ) : (
+        <>
+          <NewGameButton onClick={() => setOptionsModalOpen(true)}>
+            New Game
+          </NewGameButton>
+          <Lives>
+            {[...Array(lives)].map((_, i) => (
+              <HeartIcon key={i} color="red" />
+            ))}
+          </Lives>
+          <HelpButton onClick={() => setHowToPlayModalOpen(true)}>
+            Help
+          </HelpButton>
+          {optionsModalOpen && (
+            <Options
+              close={() => setOptionsModalOpen(false)}
+              options={options}
+              setOptions={setOptions}
+              reset={reset}
+            />
+          )}
+          <Content>
+            <Grid>
+              {colTeams?.map(({ teamId }, j) => (
+                <Header key={`${teamId}-col-header`} i={1} j={j + 2}>
+                  <Logo
+                    src={`https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`}
+                  />
+                </Header>
+              ))}
+              {rowTeams?.map(({ teamId }, i) => (
+                <Header key={`${teamId}-row-header`} i={i + 2} j={1}>
+                  <Logo
+                    src={`https://cdn.nba.com/logos/nba/${teamId}/primary/L/logo.svg`}
+                  />
+                </Header>
+              ))}
+              {rowTeams?.map((_, i) =>
+                colTeams?.map((_, j) => (
+                  <Square
+                    key={`${i}${j}`}
+                    i={i + 2}
+                    j={j + 2}
+                    selected={isSelected(i, j)}
+                    confirmed={chosenPlayers[i][j]?.confirmed}
+                    correct={chosenPlayers[i][j]?.correct}
+                    onClick={() => setSelected(i, j)}
+                  >
+                    {chosenPlayers[i][j] ? (
+                      <SquareHeadshot
+                        src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${chosenPlayers[i][j].playerId}.png`}
+                        onError={({ currentTarget }) => {
+                          currentTarget.onerror = null;
+                          currentTarget.src = 'fallback.webp';
+                        }}
+                      />
+                    ) : (
+                      <PlaceholderNumber>
+                        {options.showPlayerCount && commonPlayers[i][j].length}
+                      </PlaceholderNumber>
+                    )}
+                  </Square>
+                ))
+              )}
+            </Grid>
+
+            {playerSelectorOpen && (
+              <PlayerSelector>
+                <Search
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search for a player"
+                />
+                {search &&
+                  searchResults.slice(0, 5).map((player, i) => (
+                    <Player
+                      key={i}
+                      onClick={() => selectPlayer(player)}
+                      selected={player.id === selectedPlayerId}
+                    >
+                      {options.showPlayerHeadshots && (
+                        <Headshot
+                          src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.playerId}.png`}
+                          onError={({ currentTarget }) => {
+                            currentTarget.onerror = null;
+                            currentTarget.src = 'fallback.webp';
+                          }}
+                        />
+                      )}
+                      {`${player.firstName} ${player.lastName}`}
+                    </Player>
+                  ))}
+                <Buttons>
+                  <Button onClick={cancelSelection} appearance="secondary">
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={confirmSelection}
+                    disabled={isSquareDisabled(currentI, currentJ)}
+                  >
+                    Confirm
+                  </Button>
+                </Buttons>
+              </PlayerSelector>
+            )}
+          </Content>
+        </>
+      )}
+      {howToPlayModalOpen && (
+        <HowToPlay
+          close={() => {
+            console.log('hi');
+            setHowToPlayModalOpen(false);
+          }}
         />
       )}
-      <Content>
-        <Grid>
-          {colTeams.map(({ id }, j) => (
-            <Header key={`${id}-col-header`} i={1} j={j + 2}>
-              <Logo
-                src={`https://cdn.nba.com/logos/nba/${id}/primary/L/logo.svg`}
-              />
-            </Header>
-          ))}
-          {rowTeams.map(({ id }, i) => (
-            <Header key={`${id}-row-header`} i={i + 2} j={1}>
-              <Logo
-                src={`https://cdn.nba.com/logos/nba/${id}/primary/L/logo.svg`}
-              />
-            </Header>
-          ))}
-          {rowTeams.map((_, i) =>
-            colTeams.map((_, j) => (
-              <Square
-                key={`${i}${j}`}
-                i={i + 2}
-                j={j + 2}
-                selected={isSelected(i, j)}
-                confirmed={chosenPlayers[i][j]?.confirmed}
-                correct={chosenPlayers[i][j]?.correct}
-                onClick={() => setSelected(i, j)}
-              >
-                {chosenPlayers[i][j] ? (
-                  <SquareHeadshot
-                    src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${chosenPlayers[i][j].id}.png`}
-                    onError={({ currentTarget }) => {
-                      currentTarget.onerror = null;
-                      currentTarget.src = 'fallback.webp';
-                    }}
-                  />
-                ) : (
-                  <PlaceholderNumber>
-                    {options.showPlayerCount && commonPlayers[i][j].length}
-                  </PlaceholderNumber>
-                )}
-              </Square>
-            ))
-          )}
-        </Grid>
-        {playerSelectorOpen && (
-          <PlayerSelector>
-            <Search
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search for a player"
-            />
-            {search &&
-              searchResults.slice(0, 5).map((player, i) => (
-                <Player
-                  key={i}
-                  onClick={() => selectPlayer(player)}
-                  selected={player.id === selectedPlayerId}
-                >
-                  {options.showPlayerHeadshots && (
-                    <Headshot
-                      src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.id}.png`}
-                      onError={({ currentTarget }) => {
-                        currentTarget.onerror = null;
-                        currentTarget.src = 'fallback.webp';
-                      }}
-                    />
-                  )}
-                  {`${player.firstname} ${player.lastname}`}
-                  <Number>{player.number}</Number>
-                </Player>
-              ))}
-            <Buttons>
-              <Button
-                onClick={() => setSelectedPlayerId(null)}
-                appearance="secondary"
-              >
-                Cancel
-              </Button>
-              <Button onClick={confirmSelection}>Confirm</Button>
-            </Buttons>
-          </PlayerSelector>
-        )}
-      </Content>
     </Container>
   );
 }
@@ -225,11 +302,34 @@ const Container = styled.div`
   width: 100vw;
   height: 100vh;
   display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
-const Teams = styled.div`
+const NewGameButton = styled(Button)`
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 140px;
+  background-color: #008ad9;
+`;
+
+const Lives = styled.div`
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  background: #333333;
+`;
+
+const HeartIcon = styled(Heart)``;
+
+const HelpButton = styled(Button)`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 100px;
+  background-color: #333333;
 `;
 
 const Content = styled.div`
@@ -263,6 +363,7 @@ const Player = styled.div`
   height: 60px;
   background: #222222;
   border-radius: 8px;
+  overflow: hidden;
   padding: 8px;
   display: flex;
   align-items: center;
@@ -339,6 +440,7 @@ const Square = styled.div`
   border-radius: 8px;
   cursor: pointer;
   display: flex;
+  overflow: hidden;
 `;
 
 const Logo = styled.img`
@@ -354,12 +456,12 @@ const PlaceholderNumber = styled.span`
   margin: auto;
 `;
 
-const SettingsIcon = styled(IconSettings)`
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  margin: 20px 24px;
-  position: absolute;
-  top: 0;
-  left: 0;
+const GameOver = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 200px;
+  font-size: 24px;
+  font-weight: 800;
 `;
