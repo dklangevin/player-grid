@@ -165,7 +165,7 @@ export default function Home() {
     setSelectedPlayerId(null);
   };
 
-  const loading = true || loadingTeams || loadingPlayers;
+  const loading = loadingTeams || loadingPlayers;
 
   return (
     <Container>
