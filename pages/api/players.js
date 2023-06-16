@@ -1,16 +1,14 @@
-import { Pool } from 'pg';
-import _ from 'lodash';
-
-const LIMIT = 10;
+import prisma from 'lib/prisma';
 
 export default async function handler(request, response) {
-  const pool = new Pool(process.env.dbConfig);
-  const client = await pool.connect();
+  const players = await prisma.player.findMany({
+    select: {
+      id: true,
+      playerId: true,
+      firstName: true,
+      lastName: true,
+    },
+  });
 
-  const query = `SELECT * FROM players`;
-  const rows = (await client.query(query)).rows;
-
-  client.release();
-
-  response.status(200).json(rows);
+  response.status(200).json(players);
 }

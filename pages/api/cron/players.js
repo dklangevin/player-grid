@@ -1,5 +1,4 @@
-import { Pool } from 'pg';
-import format from 'pg-format';
+import prisma from 'lib/prisma';
 import { listPlayers } from '../../../nbaApi';
 
 export default async function handler(request, response) {
@@ -8,69 +7,31 @@ export default async function handler(request, response) {
     rows = await listPlayers();
   } catch (error) {
     console.log(error);
-    console.log('Error: cannot get players');
-    response.status(500).json('Error: cannot get players');
+    console.log('Error: cannot fetch players');
+    response.status(500).json('Error: cannot fetch players');
     return;
   }
 
-  const players = rows.map(
-    ({
-      id,
-      firstName,
-      lastName,
-      slug,
-      teamId,
-      position,
-      points,
-      assists,
-      rebounds,
-    }) => [
-      id,
-      firstName,
-      lastName,
-      slug,
-      teamId,
-      position,
-      points,
-      assists,
-      rebounds,
-    ]
-  );
+  console.log(`Players fetch success: ${rows.length} rows fetched`);
 
-  const query = format(
-    `INSERT INTO players (
-      id, 
-      firstName, 
-      lastName, 
-      slug, 
-      teamId, 
-      position, 
-      points, 
-      assists, 
-      rebounds
-    ) VALUES %L`,
-    players
-  );
+  await prisma.player.deleteMany({});
 
-  const pool = new Pool(process.env.dbConfig);
-  const client = await pool.connect();
-
+  let players;
   try {
-    await client.query('BEGIN');
-
-    // delete all then insert fresh data
-    await client.query('DELETE FROM players');
-    await client.query(query);
-
-    await client.query('COMMIT');
-  } catch (e) {
-    await client.query('ROLLBACK');
-    throw e;
-  } finally {
-    client.release();
+    players = await prisma.player.createMany({
+      data: rows.map(({ id: playerId, teamId, ...player }) => ({
+        playerId,
+        ...player,
+      })),
+    });
+  } catch (error) {
+    console.log(error);
+    console.log('Error: cannot create players'); // don't log actual error because it is likely too long
+    response.status(500).json('Error: cannot create players');
+    return;
   }
 
   response
     .status(200)
-    .json(`success -- ${players.length} player written to database`);
+    .json(`success -- ${players.count} player written to database`);
 }

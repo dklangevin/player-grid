@@ -1,8 +1,7 @@
-import { Pool } from 'pg';
-import format from 'pg-format';
+import prisma from 'lib/prisma';
 import { listTeams } from '../../../nbaApi';
 
-export default async function handler(request, response) {
+export default async function handler(_, response) {
   let rows;
   try {
     rows = await listTeams();
@@ -13,31 +12,13 @@ export default async function handler(request, response) {
     return;
   }
 
-  const teams = rows.map(({ id, name }) => [id, name]);
-  const query = format(
-    'INSERT INTO teams (id, name) VALUES %L returning id',
-    teams
-  );
+  await prisma.team.deleteMany({});
 
-  const pool = new Pool(process.env.dbConfig);
-  const client = await pool.connect();
-
-  try {
-    await client.query('BEGIN');
-
-    // delete all then insert fresh data
-    await client.query('DELETE FROM teams');
-    await client.query(query);
-
-    await client.query('COMMIT');
-  } catch (e) {
-    await client.query('ROLLBACK');
-    throw e;
-  } finally {
-    client.release();
-  }
+  const teams = await prisma.team.createMany({
+    data: rows.map(({ id: teamId, name }) => ({ teamId, name })),
+  });
 
   response
     .status(200)
-    .json(`success -- ${teams.length} teams written to database`);
+    .json(`success -- ${teams.count} teams written to database`);
 }
