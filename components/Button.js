@@ -32,7 +32,7 @@ const Container = styled.button`
   line-height: 30px;
   font-weight: 700;
   font-size: 18px;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};
 
   ${({ appearance }) =>
     appearance === 'primary'

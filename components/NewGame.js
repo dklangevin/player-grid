@@ -1,15 +1,24 @@
-import Button from './Button';
 import styled, { css } from 'styled-components';
-import { useState } from 'react';
 import { IconClose } from '../icons';
+import Button from './Button';
+import Modal from './Modal';
 import Switch from './Switch';
+import { useState } from 'react';
 
-export default function Options({ onClose, options, setOptions }) {
+export default function NewGame({ close, reset, options, setOptions }) {
+  const [internalOptions, setInternalOptions] = useState(options);
+
+  const startGame = () => {
+    setOptions(internalOptions);
+    reset();
+    close();
+  };
+
   return (
-    <Container onClick={onClose}>
+    <Modal onClick={close}>
       <Content onClick={(e) => e.stopPropagation()}>
         <Title>
-          OPTIONS <CloseIcon onClick={onClose} />
+          OPTIONS <CloseIcon onClick={close} />
         </Title>
 
         <SectionTitle>Size</SectionTitle>
@@ -19,8 +28,10 @@ export default function Options({ onClose, options, setOptions }) {
             {[3, 4, 5].map((i) => (
               <Number
                 key={i}
-                onClick={() => setOptions({ ...options, rows: i })}
-                selected={i === options.rows}
+                onClick={() =>
+                  setInternalOptions({ ...internalOptions, rows: i })
+                }
+                selected={i === internalOptions.rows}
               >
                 {i}
               </Number>
@@ -33,8 +44,10 @@ export default function Options({ onClose, options, setOptions }) {
             {[3, 4, 5].map((i) => (
               <Number
                 key={i}
-                onClick={() => setOptions({ ...options, columns: i })}
-                selected={i === options.columns}
+                onClick={() =>
+                  setInternalOptions({ ...internalOptions, columns: i })
+                }
+                selected={i === internalOptions.columns}
               >
                 {i}
               </Number>
@@ -48,11 +61,11 @@ export default function Options({ onClose, options, setOptions }) {
         <Item>
           <ItemText>Player Count</ItemText>
           <Switch
-            on={options.showPlayerCount}
+            on={internalOptions.showPlayerCount}
             onToggle={() =>
-              setOptions({
-                ...options,
-                showPlayerCount: !options.showPlayerCount,
+              setInternalOptions({
+                ...internalOptions,
+                showPlayerCount: !internalOptions.showPlayerCount,
               })
             }
           />
@@ -60,33 +73,21 @@ export default function Options({ onClose, options, setOptions }) {
         <Item>
           <ItemText>Player Headshots</ItemText>
           <Switch
-            on={options.showPlayerHeadshots}
+            on={internalOptions.showPlayerHeadshots}
             onToggle={() =>
-              setOptions({
-                ...options,
-                showPlayerHeadshots: !options.showPlayerHeadshots,
+              setInternalOptions({
+                ...internalOptions,
+                showPlayerHeadshots: !internalOptions.showPlayerHeadshots,
               })
             }
           />
         </Item>
+        <StartGameButton onClick={startGame}>Start Game</StartGameButton>
       </Content>
-    </Container>
+    </Modal>
   );
 }
-
-const Container = styled.div`
-  width: 100vw;
-  height: 100vh;
-  min-height: 100vh;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.7);
-`;
-
 const Content = styled.div`
-  width: 300px;
-  height: 100%;
   min-width: fit-content;
   display: flex;
   flex-direction: column;
@@ -94,7 +95,6 @@ const Content = styled.div`
   padding: 16px;
   font-size: 16px;
   font-weight: 900;
-  background: linear-gradient(29deg, rgb(50, 50, 50), rgb(30, 30, 30));
   backdrop-filter: blur(9px);
 `;
 
@@ -129,12 +129,10 @@ const Numbers = styled.div`
   display: flex;
   background: #444444;
   border-radius: 4px;
-  /* padding: 3px; */
 `;
 
 const Number = styled.span`
   border-radius: 4px;
-  /* margin: -1px; */
   width: 36px;
   height: 28px;
   line-height: 28px;
@@ -147,16 +145,6 @@ const Number = styled.span`
       background: #008ad9;
       color: white;
     `}
-  :hover {
-    /* color: #dddddd; */
-  }
-`;
-
-const Checkbox = styled.input`
-  width: 22px;
-  height: 22px;
-  border-radius: 8px;
-  cursor: pointer;
 `;
 
 const CloseIcon = styled(IconClose)`
@@ -169,4 +157,8 @@ const CloseIcon = styled(IconClose)`
 const Divider = styled.hr`
   width: 100%;
   border: 1px solid #343434;
+`;
+
+const StartGameButton = styled(Button)`
+  margin-top: 16px;
 `;
