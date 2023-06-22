@@ -11,6 +11,7 @@ export default async function handler(request, response) {
       },
     })
   ).map(({ teamId }) => teamId);
+
   const randomSubsetIds = shuffled(_teamsIds).slice(0, limit);
 
   const teams = await prisma.team.findMany({
@@ -32,5 +33,7 @@ export default async function handler(request, response) {
     },
   });
 
-  response.status(200).json(teams);
+  const shuffledTeams = shuffled(teams);
+
+  response.status(200).json(shuffledTeams);
 }

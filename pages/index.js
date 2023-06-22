@@ -46,8 +46,12 @@ export default function Home() {
 
   const seed = generateSeed();
 
-  const teamIds = [1610612737, 1610612738, 1610612739];
+  const teamIds = [
+    1610612744, 1610612740, 1610612764, 1610612753, 1610612743, 1610612763,
+    1610612746, 1610612752,
+  ];
   const { data: teams, loading: loadingTeams } = useTeams({
+    // teamIds,
     limit: options.rows + options.columns,
   });
   const { data: players, loading: loadingPlayers } = usePlayers();

@@ -1,7 +1,22 @@
 export const intersection = (arrayA, arrayB) =>
   arrayA.filter((value) => arrayB.includes(value));
 
-export const shuffled = (array) => array.sort(() => 0.5 - Math.random());
+export const shuffled = (array) => {
+  let currentIndex = array.length,
+    randomIndex;
+
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+};
 
 export const rowMapping = (mapping, headers) => {
   const entries = Object.entries(mapping).map(([key, value]) => [
